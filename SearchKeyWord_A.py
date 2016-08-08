@@ -5,15 +5,43 @@ import re
 import psycopg2 as pg2
 import sys
 
-def selectarticle(aid):
+def getcfg(filename):
+    try:
+        with open(filename,'rb') as cfg:
+            cfglist = cfg.readlines()
+            a = []
+            for i in range(len(cfglist)):
+                if cfglist[i] == '\r\n':
+                    pass
+                elif cfglist[i] == '\n':
+                    pass
+                elif cfglist[i] == '\r':
+                    pass
+                else:
+                    cfglist[i] = cfglist[i].replace('\r','')
+                    cfglist[i] = cfglist[i].replace('\n','')
+                    cfglist[i] = cfglist[i].replace(' ','')
+                    cfglist[i] = cfglist[i].split('=')
+                    a.append((cfglist[i][0],cfglist[i][1]))
+        a = dict(a)
+    except Exception,e:
+        print e
+        print 'Please check checkboard.cfg,looks like something configured wrong.'
+        anyenter = raw_input('Press ENTER to confirm.')
+    return a
+
+def selectarticle(aid,kind,db,us,pwd,hst,pt):
     aid = int(aid)
-    sql = 'select title,content from spam_article where aid=%s' % (aid)
+    if kind == 1:
+        sql = 'select title,content from spam_article where aid=%s' % (aid)
+    else:
+        sql = 'select a.title,ac.content from article a,article_content ac where aid=%s and a.guid=ac.guid' % (aid)
     con = pg2.connect(
-        database='',
-        user='',
-        password='',
-        host='',
-        port='')
+        database=db,
+        user=us,
+        password=pwd,
+        host=hst,
+        port=pt)
     cur = con.cursor()
     cur.execute(sql)
     output = cur.fetchall()
@@ -39,12 +67,14 @@ def ismatch(keyword,article):
     else:
         return er
 
+cfg = getcfg('SearchKeyWord.cfg.txt')
+
 conn = pg2.connect(
-    database='',
-    user='',
-    password='',
-    host='',
-    port='')
+    database=cfg['database'],
+    user=cfg['user'],
+    password=cfg['password'],
+    host=cfg['host'],
+    port=cfg['port'])
 
 sql1 = r"select kid,word from spam_keyword where filter_pos=0 and word ~ '^(?!.*\+)(?!.*?\))(?!.*?\().*$'"
 cur1 = conn.cursor()
@@ -67,19 +97,28 @@ print ' All key words are not included such as + ( )','\n'
 
 conn.close()
 
-aid = raw_input(' Enter an aid:')
+aid = cfg['aid']
 aid = aid.replace(' ','')
-article = selectarticle(aid)
+isspam = cfg['isspam']
+
+if isspam == '1':
+    kind = 1
+else:
+    kind = 0
+article = selectarticle(aid,kind,cfg['database'],cfg['user'],cfg['password'],cfg['host'],cfg['port'])
 
 with open('aa.txt','w') as aa:
     aa.write('-'*30+'Title'+'-'*30+'\n')
-    aa.write(article['title'].decode('utf8').encode('gbk'))
+    aa.write(article['title'])
+#    aa.write(article['title'].decode('utf8').encode('gbk'))
     aa.write('\n\n')
     aa.write('-'*30+'Content'+'-'*30+'\n')
-    aa.write(article['content'].decode('utf8').encode('gbk'))
+    aa.write(article['content'])
+#    aa.write(article['content'].decode('utf8').encode('gbk'))
     aa.write('\n\n')
     aa.write('-'*30+'Both'+'-'*30+'\n')
-    aa.write(article['both'].decode('utf8').encode('gbk'))
+    aa.write(article['both'])
+ #   aa.write(article['both'].decode('utf8').encode('gbk'))
 
 print ' Aid:',aid
 print ' Title length:',len(article['title'].decode('utf8'))
@@ -114,6 +153,7 @@ for a3 in output3:
     else:
         pass
 print ' Article match kids:',kids,'\n'
+
 
 start = raw_input('*'*78)
 sys.exit()
