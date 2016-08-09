@@ -4,4 +4,3 @@ password=
 host=
 port=
 isspam=1
-aid=1363618061

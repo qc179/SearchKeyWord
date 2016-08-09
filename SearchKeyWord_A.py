@@ -93,67 +93,76 @@ cur3 = conn.cursor()
 cur3.execute(sql3)
 output3 = cur3.fetchall()
 print ' filter_pos=2 keyword:',len(output3)
-print ' All key words are not included such as + ( )','\n'
+print ' All key words are not included such as + ( )'
+print '*'*78
 
 conn.close()
 
-aid = cfg['aid']
-aid = aid.replace(' ','')
-isspam = cfg['isspam']
+if __name__=='__main__':
+    while True:
+        aid = raw_input(' Aid:')
+        aid = aid.replace(' ','')
 
-if isspam == '1':
-    kind = 1
-else:
-    kind = 0
-article = selectarticle(aid,kind,cfg['database'],cfg['user'],cfg['password'],cfg['host'],cfg['port'])
+        if aid == 'q':
+            break
+        else:
+            pass
 
-with open('aa.txt','w') as aa:
-    aa.write('-'*30+'Title'+'-'*30+'\n')
-    aa.write(article['title'])
-#    aa.write(article['title'].decode('utf8').encode('gbk'))
-    aa.write('\n\n')
-    aa.write('-'*30+'Content'+'-'*30+'\n')
-    aa.write(article['content'])
-#    aa.write(article['content'].decode('utf8').encode('gbk'))
-    aa.write('\n\n')
-    aa.write('-'*30+'Both'+'-'*30+'\n')
-    aa.write(article['both'])
- #   aa.write(article['both'].decode('utf8').encode('gbk'))
+        isspam = cfg['isspam']
 
-print ' Aid:',aid
-print ' Title length:',len(article['title'].decode('utf8'))
-print ' Content length:',len(article['content'].decode('utf8')),'\n'
+        if isspam == '1':
+            kind = 1
+        else:
+            kind = 0
 
-kids = []
-print ' Search title ...'
-for a1 in output1:
-    if ismatch(a1[1],article['title']):
-        print '',a1[0],'---> ',a1[1].decode('utf8')
-        kids.append(int(a1[0]))
-    else:
-        pass
-print ' Title match kids:',kids,'\n'
+        article = selectarticle(aid,kind,cfg['database'],cfg['user'],cfg['password'],cfg['host'],cfg['port'])
 
-kids = []
-print ' Search content ...'
-for a2 in output2:
-    if ismatch(a2[1],article['content']):
-        print '',a2[0],'---> ',a2[1].decode('utf8')
-        kids.append(int(a2[0]))
-    else:
-        pass
-print ' Content match kids:',kids,'\n'
+        with open('aa.txt','w') as aa:
+            aa.write('-'*30+'Title'+'-'*30+'\n')
+            aa.write(article['title'])
+        #    aa.write(article['title'].decode('utf8').encode('gbk'))
+            aa.write('\n\n')
+            aa.write('-'*30+'Content'+'-'*30+'\n')
+            aa.write(article['content'])
+        #    aa.write(article['content'].decode('utf8').encode('gbk'))
+            aa.write('\n\n')
+            aa.write('-'*30+'Both'+'-'*30+'\n')
+            aa.write(article['both'])
+        #    aa.write(article['both'].decode('utf8').encode('gbk'))
 
-kids = []
-print ' Search both ...'
-for a3 in output3:
-    if ismatch(a3[1],article['both']):
-        print '',a3[0],'---> ',a3[1].decode('utf8')
-        kids.append(int(a3[0]))
-    else:
-        pass
-print ' Article match kids:',kids,'\n'
+        print ' '
+        print ' Title length:',len(article['title'].decode('utf8'))
+        print ' Content length:',len(article['content'].decode('utf8')),'\n'
 
+        kids = []
+        print ' Search title ...'
+        for a1 in output1:
+            if ismatch(a1[1],article['title']):
+                print '',a1[0],'---> ',a1[1].decode('utf8')
+                kids.append(int(a1[0]))
+            else:
+                pass
+        print ' Title match kids:',kids,'\n'
 
-start = raw_input('*'*78)
+        kids = []
+        print ' Search content ...'
+        for a2 in output2:
+            if ismatch(a2[1],article['content']):
+                print '',a2[0],'---> ',a2[1].decode('utf8')
+                kids.append(int(a2[0]))
+            else:
+                pass
+        print ' Content match kids:',kids,'\n'
+
+        kids = []
+        print ' Search both ...'
+        for a3 in output3:
+            if ismatch(a3[1],article['both']):
+                print '',a3[0],'---> ',a3[1].decode('utf8')
+                kids.append(int(a3[0]))
+            else:
+                pass
+        print ' Article match kids:',kids,'\n'
+        print '*'*78
+
 sys.exit()
